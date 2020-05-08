@@ -1,0 +1,108 @@
+This is VolButKill, essentially elesbb's "Hold Back to Kill", but worse.
+The upside is, it works for devices that do not have a physical back button.
+The downside is, it does not use the back button, physical or not.
+Instead, the volume buttons are abused to achieve a similar purpose.
+
+The procedure is a bit more involved and less intuitive than in HBTK:
+
+1. Press both volume buttons at approximately the same time (within 250ms
+   of one another).  Release both buttons.  This "arms" the kill logic;
+   the phone will confirm it with a brief vibration and a toast message.
+
+2. For the next 10 seconds, both volume buttons are assigned new functions:
+   - Holding volume up for 1 second will kill the foreground app
+   - Pressing volume down will disarm the kill logic early and restore
+     normal behavior
+
+The 10 second timespan is chosen for phones that produce some action for
+pressing both volume buttons (like older LG phones launching QuickMemo),
+so there is enough time to get the to-be-killed app back to the foreground.
+
+It was considered to avoid the whole arm/disarm logic and kill on holding
+both buttons for a set duration, but that makes it difficult to quickly
+put away any QuickMemo-like apps popping up, and it also activates some
+accessibility feature like talkback on other phones.
+
+It was considered to kill upon, say, holding volume up for a while and
+then tapping volume down, or vice versa.  But that sucks as well, nobody
+wants their ring volume changed every time a misbehaving app needs to go.
+
+Therefore, arm-then-kill it is.
+
+Notes and caveats:
+
+- The minimum required API level for VolButKill is 18, corresponding to
+  Android 4.3.x (Jelly Bean).  It has been confirmed to work
+  on 4.4 (KitKat) and 8.0.0 (Oreo).  Feel free to report back other
+  versions you've tested it on.
+
+- All the delays, as well as the button sequences are hardwired; there is
+  no configuration-like activity.  This is /just/ a naked accessibility
+  service.  After installing, it has to be enabled in the accessibility
+  submenu inside the phone settings before it will work.
+
+- It (obviousy) requires the phone to be rooted.  It has been tested with
+  Magisk as well as with an ancient version of SuperSU; it should work with
+  anything that provides a 'su' and a 'killall' program.
+
+- VolButKill will try to avoid killing the "Home" screen.  If the app name
+  of your launcher is not "Home", that will not work.  Feel free to drop
+  me an email to get your launcher app added to the do-not-kill list.
+
+- VolButKill will try to avoid killing keyboard apps.  Due to the way the
+  foreground app detection works, if the foreground app has its focus on
+  a widget that causes a keyboard to be displayed (like a text input field),
+  the actual foreground app is actually the keyboard itself, so what would
+  be killed is the keyboard, not the app itself.  In order to avoid this
+  situation, VolButKill will ignore any app that has the string 'keyboard'
+  in its package name.  There probably exists keyboards with offball package
+  names that will be missed; if you encounter your keyboard being killed
+  drop me an email to add your keyboard app to the do-not-kill list.
+  "Hold Back to Kill" did not suffer from this issue because it detected
+  the foreground app in a way that Android no longer supports as of more
+  recent versions.
+
+- VolButKill is implemented as an accessibility service, but does not
+  actually provide accessibility features.  This is a big Google No-No.
+  For this reason it will never be allowed on the Google Play Store.
+  Any attempt to submit it will only fuel Google's hate boner for people
+  using accessibility services for features they weren't designed to do
+  and make life more difficult for everybody doing this.
+
+- VolButKill is Free and Open Source Software, licensed under the 3-clause
+  BSD License.  Feel free to copy/modify/share/whatever VolButKill as
+  long as you credit the original author and keep the license terms intact.
+  Look at the bottom of this file for details.
+
+- I don't usually write Android apps, and for all I know I did every single
+  thing wrong and violated every design and programming guideline in
+  existence.  If you're an experienced/knowledgable Android programmer and
+  reading the source, feel free to report things that seem off/wrong.
+
+- You can contact me at <fstd+vbk@pr0.tips> or on #fstd on irc.freenode.org
+
+
+Copyright (c) 2020, Timo Buhrmester
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the srs bsns enterprises corp. nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
