@@ -130,7 +130,6 @@ public class VolButKillSVC extends AccessibilityService {
 
 	private String curFgProc = ""; /* package name of current foreground app */
 
-
 	private final Object lock = new Object();
 	private Killer killer = null;
 	private Handler mHandler = new Handler();
@@ -186,33 +185,35 @@ public class VolButKillSVC extends AccessibilityService {
 
 	@Override
 	public void onAccessibilityEvent(AccessibilityEvent event) {
-		if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-			if (event.getPackageName() != null) {
-				try {
-					ApplicationInfo ai = getPackageManager().getApplicationInfo(
-					  event.getPackageName().toString(), 0);
-					if (ai.processName.equals("com.android.systemui")) {
-						/*
-						 * quirk: this is the volume change popup, we do /not/
-						 * get a window change notification back to the original
-						 * app after it goes away.  might be a bug in android.
-						 * anyway, ignore it.
-						 */
-						Log.d(TAG, "ignoring: " + ai.processName);
-					} else if (ai.processName.toLowerCase().contains("keyboard")) {
-						/*
-						 * likewise, we usually don't want to kill the keyboard
-						 * but the app that's using the keyboard
-						 */
-						Log.d(TAG, "ignoring: " + ai.processName);
-					} else {
-						curFgProc = ai.processName;
-						Log.d(TAG, "foreground windows is now: " + curFgProc);
-					}
-				} catch (Exception e) {
-					Log.e(TAG, "caught " + e.toString(), e);
-				}
+		if (event.getEventType() != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
+			return;
+
+		if (event.getPackageName() == null)
+			return;
+
+		try {
+			ApplicationInfo ai = getPackageManager().getApplicationInfo(
+			  event.getPackageName().toString(), 0);
+			if (ai.processName.equals("com.android.systemui")) {
+				/*
+				 * quirk: this is the volume change popup, we do /not/
+				 * get a window change notification back to the original
+				 * app after it goes away.  might be a bug in android.
+				 * anyway, ignore it.
+				 */
+				Log.d(TAG, "ignoring: " + ai.processName);
+			} else if (ai.processName.toLowerCase().contains("keyboard")) {
+				/*
+				 * likewise, we usually don't want to kill the keyboard
+				 * but the app that's using the keyboard
+				 */
+				Log.d(TAG, "ignoring: " + ai.processName);
+			} else {
+				curFgProc = ai.processName;
+				Log.d(TAG, "foreground windows is now: " + curFgProc);
 			}
+		} catch (Exception e) {
+			Log.e(TAG, "caught " + e.toString(), e);
 		}
 	}
 
@@ -261,7 +262,6 @@ public class VolButKillSVC extends AccessibilityService {
 				}
 			}
 		} else {
-
 			/* disarm with volume-down while armed. */
 			if (event.getKeyCode() == KEYCODE_VOLUME_DOWN && event.getAction() == ACTION_DOWN
 			  && !volUpIsPressed) {
@@ -326,7 +326,6 @@ public class VolButKillSVC extends AccessibilityService {
 
 		return consume;
 	}
-
 }
 
 /* TODO
